@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How's Your day dee&lt;4</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <!-- Login Page -->
+    <div id="login-container" class="container">
+        <div class="login-form">
+            <h1 class="title">How's Your day dee&lt;4</h1>
+            <div class="heart-animation">
+                <i class="fas fa-heart"></i>
+            </div>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <div class="form-group remember-me">
+                    <input type="checkbox" id="remember-me" name="remember-me">
+                    <label for="remember-me">Remember me</label>
+                </div>
+                <div id="login-error" class="error-message"></div>
+                <button type="submit" class="btn">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main App (Hidden initially) -->
+    <div id="app-container" class="container hidden">
+        <header>
+            <div class="logo">How's Your day dee&lt;4</div>
+            <nav>
+                <ul>
+                    <li><a href="#" class="nav-link active" data-page="beranda">Beranda</a></li>
+                    <li><a href="#" class="nav-link" data-page="kalender">Kalender</a></li>
+                    <li><a href="#" class="nav-link" data-page="about">About This Site</a></li>
+                </ul>
+            </nav>
+            <div class="user-info">
+                <span id="user-display"></span>
+                <button id="logout-btn" class="btn-small">Logout</button>
+            </div>
+        </header>
+
+        <main>
+            <!-- Beranda Page -->
+            <section id="beranda" class="page">
+                <h2>Bagaimana harimu hari ini?</h2>
+                <form id="daily-form">
+                    <div class="form-section">
+                        <h3>Aktivitas Makan</h3>
+                        <div class="form-group">
+                            <label>Makan Pagi:</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="makan-pagi" value="ya" required> Ya</label>
+                                <label><input type="radio" name="makan-pagi" value="tidak"> Tidak</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Makan Siang:</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="makan-siang" value="ya" required> Ya</label>
+                                <label><input type="radio" name="makan-siang" value="tidak"> Tidak</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Makan Malam:</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="makan-malam" value="ya" required> Ya</label>
+                                <label><input type="radio" name="makan-malam" value="tidak"> Tidak</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Jajan:</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="jajan" value="ya" required> Ya</label>
+                                <label><input type="radio" name="jajan" value="tidak"> Tidak</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Rekomendasi Makanan</h3>
+                        <div class="food-recommendations">
+                            <div class="food-item">
+                                <input type="checkbox" id="food1" name="food" value="Nasi Goreng">
+                                <label for="food1">Bebek Lalapan</label>
+                            </div>
+                            <div class="food-item">
+                                <input type="checkbox" id="food2" name="food" value="Soto Ayam">
+                                <label for="food2">Ayam Penyet</label>
+                            </div>
+                            <div class="food-item">
+                                <input type="checkbox" id="food3" name="food" value="Mie Ayam">
+                                <label for="food3">Ayam Bakar</label>
+                            </div>
+                            <div class="food-item">
+                                <input type="checkbox" id="food4" name="food" value="Bakso">
+                                <label for="food4">Cimol</label>
+                            </div>
+                            <div class="food-item">
+                                <input type="checkbox" id="food5" name="food" value="Gado-gado">
+                                <label for="food5">Ayam Cabe Ijo</label>
+                            </div>
+                            <div class="food-item">
+                                <input type="checkbox" id="food6" name="food" value="Rendang">
+                                <label for="food6">Lele</label>
+                            </div>
+                            <div class="food-item">
+                                <input type="checkbox" id="food7" name="food" value="Sate">
+                                <label for="food7">Sate</label>
+                            </div>
+                            <div class="food-item">
+                                <input type="checkbox" id="food8" name="food" value="Ayam Goreng">
+                                <label for="food8">Ayam Goreng</label>
+                            </div>
+                            <div class="food-item">
+                                <input type="checkbox" id="food9" name="food" value="Bubur Ayam">
+                                <label for="food9">Gacoan(jangan sering)</label>
+                            </div>
+                            <div class="food-item">
+                                <input type="checkbox" id="food10" name="food" value="Martabak">
+                                <label for="food10">Mie</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Rating Hari Ini</h3>
+                        <div class="star-rating">
+                            <i class="fas fa-star" data-rating="1"></i>
+                            <i class="fas fa-star" data-rating="2"></i>
+                            <i class="fas fa-star" data-rating="3"></i>
+                            <i class="fas fa-star" data-rating="4"></i>
+                            <i class="fas fa-star" data-rating="5"></i>
+                            <input type="hidden" name="rating" id="rating-value" required>
+                        </div>
+                    </div>
+                    <div class="form-section">
+                        <h3>Curhat Hari Ini</h3>
+                        <div class="form-group">
+                            <label for="curhat"></label>
+                            <textarea id="curhat" name="curhat" rows="5" placeholder="Cerita tentang harimu..." required></textarea>
+                        </div>
+                    </div>
+                    
+
+                    <button type="submit" class="btn">Simpan</button>
+                </form>
+            </section>
+
+            <!-- Kalender Page -->
+            <section id="kalender" class="page hidden">
+                <h2>Kalender Mood</h2>
+                
+                <div class="user-filter">
+                    <label for="user-selector">Lihat data:</label>
+                    <select id="user-selector" class="user-select">
+                        <option value="all">Semua Pengguna</option>
+                    </select>
+                </div>
+                
+                <div class="calendar-controls">
+                    <button id="prev-month" class="btn-small"><i class="fas fa-chevron-left"></i></button>
+                    <h3 id="current-month-display"></h3>
+                    <button id="next-month" class="btn-small"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                <div class="calendar-container">
+                    <div class="weekdays">
+                        <div>Min</div>
+                        <div>Sen</div>
+                        <div>Sel</div>
+                        <div>Rab</div>
+                        <div>Kam</div>
+                        <div>Jum</div>
+                        <div>Sab</div>
+                    </div>
+                    <div id="calendar-days" class="calendar-days"></div>
+                </div>
+                <div id="day-details" class="day-details hidden">
+                    <h3 id="selected-date"></h3>
+                    <div id="day-content"></div>
+                </div>
+            </section>
+
+            <!-- About Page -->
+            <section id="about" class="page hidden">
+                <div class="about-content">
+                    <div class="raya-image">
+                        <img src="raya.jpg" alt="raya illustration">
+                    </div>
+                    <div class="about-text">
+                        <h2>Hi Dede</h2>
+                        <p>Selamat datang di "How's Your day dee&lt;4", tempat curhat buat dede.</p>
+                        <p>Laki-laki disamping ini hanya bocah ingusan yang tak saling kenal denganmu, dia datang dengan bahagia, kemudian mengahncurkannya. Tapi yang laki-laki  ini tahu hanya sayang dan cinta</p>
+                        <p>Web ini buat dede ya, kalau pusing atau stress boleh lampiasin disini. Seandainya kalau laki-laki disamping udah gaada lagi mungkin web ini jadi tempat paling kita ingat</p>
+                        <p>Thankyou So Much. I Love You Forever.</p>
+                        <div class="heart-animation">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Made by Raya with love ❤️</p>
+        </footer>
+    </div>
+
+    <!-- Popup for low ratings -->
+    <div id="playlist-popup" class="popup hidden">
+        <div class="popup-content">
+            <span class="close-popup">&times;</span>
+            <h3>Tampaknya harimu suram</h3>
+            <p>Mungkin ini beberapa list playlist yang dapat kamu dengar:</p>
+            <div class="playlists">
+                <div class="playlist-item">
+                    <img src="playlist1.jpg" alt="Playlist 1">
+                    <a href="https://open.spotify.com/playlist/37i9dQZF1DX7qK8ma5wgG1" target="_blank">Mood Booster</a>
+                </div>
+                <div class="playlist-item">
+                    <img src="playlist2.jpg" alt="Playlist 2">
+                    <a href="https://open.spotify.com/playlist/37i9dQZF1DX4sWSpwq3LiO" target="_blank"> Mood Booster</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script type="module" src="firebase-config.js"></script>
+    <script type="module" src="script.js"></script>
+</body>
+</html>
