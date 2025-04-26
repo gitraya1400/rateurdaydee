@@ -7,6 +7,8 @@ import {
   getDocs,
   query,
   where,
+  addDoc,
+  serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"
 
 // User credentials - simple username/password pairs
@@ -84,18 +86,22 @@ loginForm.addEventListener("submit", async (e) => {
     localStorage.setItem("currentUser", username)
     localStorage.setItem("rememberMe", rememberMe)
 
+    try {
+      await addDoc(collection(db, "loginLogs"), {
+        username: username,
+        timestamp: serverTimestamp()
+      })
+      console.log("Login log saved for:", username)
+    } catch (error) {
+      console.error("Error saving login log:", error)
+    }
+  
     await loadUserData()
     await loadAllUsersData()
     populateUserSelector()
-    showApp() // Make sure this is being called
+    showApp()
     console.log("App should be visible now")
-  } else {
-    loginError.textContent = "Username atau password salah!"
-    setTimeout(() => {
-      loginError.textContent = ""
-    }, 3000)
   }
-})
 
 // Logout button
 logoutBtn.addEventListener("click", () => {
