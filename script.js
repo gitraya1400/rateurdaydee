@@ -525,4 +525,4 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!userDisplay) console.error("userDisplay not found")
 
   checkLoggedInUser()
-})
+})})
