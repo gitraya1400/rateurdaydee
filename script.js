@@ -86,27 +86,21 @@ loginForm.addEventListener("submit", async (e) => {
     localStorage.setItem("currentUser", username)
     localStorage.setItem("rememberMe", rememberMe)
 
-     try {
-      await addDoc(collection(db, "loginLogs"), {
-        username: username,
-        timestamp: serverTimestamp()
-      })
-      console.log("Login log berhasil ditambah!")
-    } catch (error) {
-      console.error("Error saat tambah login log:", error)
-    }
-
-    await loadUserData()
-    await loadAllUsersData()
-    populateUserSelector()
-    showApp()
-  } else {
-    loginError.textContent = "Username atau password salah!"
-    setTimeout(() => {
-      loginError.textContent = ""
-    }, 3000)
+       try {
+    await addDoc(collection(db, "loginLogs"), {
+      username: username,
+      timestamp: serverTimestamp()
+    })
+    console.log("Login log berhasil disimpan!")
+  } catch (error) {
+    console.error("Gagal simpan login log:", error)
   }
-})
+
+  await loadUserData()
+  await loadAllUsersData()
+  populateUserSelector()
+  showApp()
+}
 
 // Logout button
 logoutBtn.addEventListener("click", () => {
