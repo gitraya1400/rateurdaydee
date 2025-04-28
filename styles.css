@@ -13,6 +13,7 @@
   --rating-3-color: #74b9ff;
   --rating-4-color: #0984e3;
   --rating-5-color: #ffd700;
+  --admin-color: #4caf50;
 }
 
 * {
@@ -79,6 +80,16 @@ h3 {
 .btn-small {
   padding: 8px 16px;
   font-size: 14px;
+}
+
+/* Admin Button */
+.admin-btn {
+  background-color: var(--admin-color);
+  margin-right: 10px;
+}
+
+.admin-btn:hover {
+  background-color: #3d8b40;
 }
 
 /* Login Page */
@@ -472,9 +483,13 @@ footer {
   margin-top: 20px;
 }
 
+/* Modify the playlist-item styling to ensure text alignment */
 .playlist-item {
   text-align: center;
   transition: transform 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .playlist-item:hover {
@@ -494,6 +509,9 @@ footer {
   color: var(--primary-color);
   text-decoration: none;
   font-weight: 500;
+  text-align: center;
+  width: 100%;
+  display: block;
 }
 
 .playlist-item a:hover {
@@ -530,6 +548,48 @@ footer {
   }
 }
 
+/* Login Info Page */
+.login-info-content {
+  margin-top: 20px;
+}
+
+.login-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.login-table th,
+.login-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.login-table th {
+  background-color: var(--admin-color);
+  color: white;
+  font-weight: 600;
+}
+
+.login-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.login-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+.device-info {
+  max-width: 300px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .about-content {
@@ -552,6 +612,14 @@ footer {
   .user-info {
     width: 100%;
     justify-content: space-between;
+  }
+
+  .login-table {
+    font-size: 14px;
+  }
+
+  .device-info {
+    max-width: 150px;
   }
 }
 
@@ -582,6 +650,15 @@ footer {
   .form-group textarea:focus {
     border-color: var(--primary-color);
     outline: none;
+  }
+
+  .login-table th,
+  .login-table td {
+    padding: 8px;
+  }
+
+  .device-info {
+    max-width: 100px;
   }
 }
 
