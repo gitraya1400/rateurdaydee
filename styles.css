@@ -578,10 +578,550 @@ footer {
     resize: vertical;
     transition: border-color 0.3s;
   }
-  
+
   .form-group textarea:focus {
     border-color: var(--primary-color);
     outline: none;
   }
-  
+}
+
+/* 3D Animations */
+.animations-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Cute Whale Animation */
+.whale-animation {
+  position: absolute;
+  bottom: 10%;
+  left: 5%;
+  width: 100px;
+  height: 60px;
+  animation: float 15s infinite alternate;
+}
+
+.whale-body {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: #6b8cff;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.whale-eye {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #000;
+  border-radius: 50%;
+  top: 20px;
+  left: 20px;
+}
+
+.whale-tail {
+  position: absolute;
+  width: 40px;
+  height: 20px;
+  background: #6b8cff;
+  right: -20px;
+  top: 20px;
+  border-radius: 0 50% 50% 0;
+  animation: tail-wiggle 2s infinite alternate;
+}
+
+@keyframes tail-wiggle {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(20deg);
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(30px, -20px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+/* Seagull Animation */
+.seagull-animation {
+  position: absolute;
+  top: 15%;
+  right: 10%;
+  animation: fly 20s infinite linear;
+}
+
+.seagull-body {
+  position: relative;
+  width: 40px;
+  height: 20px;
+  background: #f5f5f5;
+  border-radius: 50%;
+}
+
+.seagull-wing-left,
+.seagull-wing-right {
+  position: absolute;
+  width: 30px;
+  height: 10px;
+  background: #f5f5f5;
+  top: 5px;
+}
+
+.seagull-wing-left {
+  left: -20px;
+  border-radius: 50% 0 0 50%;
+  animation: flap-left 1s infinite alternate;
+}
+
+.seagull-wing-right {
+  right: -20px;
+  border-radius: 0 50% 50% 0;
+  animation: flap-right 1s infinite alternate;
+}
+
+@keyframes flap-left {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(-30deg);
+  }
+}
+
+@keyframes flap-right {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(30deg);
+  }
+}
+
+@keyframes fly {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-100px, 50px);
+  }
+  50% {
+    transform: translate(-200px, 0);
+  }
+  75% {
+    transform: translate(-100px, -50px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+/* Lily Animation */
+.lily-animation {
+  position: absolute;
+  bottom: 5%;
+  right: 15%;
+  animation: sway 8s infinite alternate;
+}
+
+.lily-stem {
+  position: absolute;
+  width: 5px;
+  height: 100px;
+  background: #4caf50;
+  bottom: 0;
+  left: 30px;
+}
+
+.lily-flower {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  bottom: 100px;
+  left: 0;
+}
+
+.lily-petal {
+  position: absolute;
+  width: 20px;
+  height: 40px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+.lily-petal:nth-child(1) {
+  transform: rotate(0deg) translate(20px, 0);
+}
+.lily-petal:nth-child(2) {
+  transform: rotate(72deg) translate(20px, 0);
+}
+.lily-petal:nth-child(3) {
+  transform: rotate(144deg) translate(20px, 0);
+}
+.lily-petal:nth-child(4) {
+  transform: rotate(216deg) translate(20px, 0);
+}
+.lily-petal:nth-child(5) {
+  transform: rotate(288deg) translate(20px, 0);
+}
+
+.lily-center {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: #ffd700;
+  border-radius: 50%;
+  top: 20px;
+  left: 20px;
+}
+
+@keyframes sway {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(5deg);
+  }
+}
+
+/* Goose Animation */
+.goose-animation {
+  position: absolute;
+  bottom: 20%;
+  left: 20%;
+  animation: waddle 25s infinite linear;
+}
+
+.goose-body {
+  position: relative;
+  width: 60px;
+  height: 40px;
+  background: #f5f5f5;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+}
+
+.goose-neck {
+  position: absolute;
+  width: 10px;
+  height: 40px;
+  background: #f5f5f5;
+  top: -30px;
+  left: 10px;
+  border-radius: 50%;
+  transform: rotate(-20deg);
+}
+
+.goose-head {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: #f5f5f5;
+  top: -45px;
+  left: 0;
+  border-radius: 50%;
+}
+
+.goose-beak {
+  position: absolute;
+  width: 15px;
+  height: 8px;
+  background: #ff9800;
+  top: -40px;
+  left: -10px;
+  border-radius: 50% 0 0 50%;
+}
+
+@keyframes waddle {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(100px, 0) rotateY(180deg);
+  }
+  50% {
+    transform: translate(200px, 0) rotateY(180deg);
+  }
+  75% {
+    transform: translate(100px, 0) rotateY(0deg);
+  }
+  100% {
+    transform: translate(0, 0) rotateY(0deg);
+  }
+}
+
+/* Betta Fish Animation */
+.betta-animation {
+  position: absolute;
+  bottom: 40%;
+  right: 25%;
+  animation: swim 18s infinite alternate;
+}
+
+.betta-body {
+  position: relative;
+  width: 40px;
+  height: 20px;
+  background: #1e88e5;
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  box-shadow: 0 0 15px rgba(30, 136, 229, 0.5);
+}
+
+.betta-tail {
+  position: absolute;
+  width: 40px;
+  height: 30px;
+  background: #1e88e5;
+  right: -30px;
+  top: -5px;
+  border-radius: 0 50% 50% 0;
+  transform-origin: left center;
+  animation: tail-wave 2s infinite alternate;
+  box-shadow: 0 0 15px rgba(30, 136, 229, 0.5);
+}
+
+.betta-fin-top {
+  position: absolute;
+  width: 30px;
+  height: 20px;
+  background: #1e88e5;
+  top: -15px;
+  left: 10px;
+  border-radius: 50% 50% 0 0;
+  animation: fin-wave 3s infinite alternate;
+  box-shadow: 0 0 15px rgba(30, 136, 229, 0.5);
+}
+
+.betta-fin-bottom {
+  position: absolute;
+  width: 30px;
+  height: 20px;
+  background: #1e88e5;
+  bottom: -15px;
+  left: 10px;
+  border-radius: 0 0 50% 50%;
+  animation: fin-wave 3s infinite alternate-reverse;
+  box-shadow: 0 0 15px rgba(30, 136, 229, 0.5);
+}
+
+.betta-eye {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  background: #000;
+  border-radius: 50%;
+  top: 8px;
+  left: 8px;
+}
+
+@keyframes tail-wave {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(20deg);
+  }
+}
+
+@keyframes fin-wave {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(20deg);
+  }
+}
+
+@keyframes swim {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(-50px, 30px) rotate(10deg);
+  }
+  50% {
+    transform: translate(-100px, 0) rotate(0deg);
+  }
+  75% {
+    transform: translate(-50px, -30px) rotate(-10deg);
+  }
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+/* Special Date Styling */
+.calendar-day.special-date {
+  background-color: rgba(255, 192, 203, 0.3);
+  border: 2px dashed var(--primary-color);
+  position: relative;
+}
+
+.calendar-day.special-date::after {
+  content: "❤️";
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 10px;
+}
+
+.calendar-day.anniversary-date {
+  background-color: rgba(255, 215, 0, 0.3);
+  border: 2px solid var(--accent-color);
+  position: relative;
+  overflow: hidden;
+}
+
+.calendar-day.anniversary-date::before {
+  content: "🎉";
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 10px;
+}
+
+.anniversary-highlight {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  pointer-events: none;
+  animation: pulse-border 2s infinite;
+}
+
+@keyframes pulse-border {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 215, 0, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
+  }
+}
+
+/* Special Date Popup */
+#special-date-popup .popup-content {
+  max-width: 400px;
+  text-align: center;
+}
+
+#special-date-title {
+  color: var(--primary-color);
+  margin-bottom: 15px;
+}
+
+#special-date-message {
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+
+/* Celebration Animation */
+.confetti-container {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+  margin-top: 20px;
+}
+
+.confetti {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: var(--accent-color);
+  opacity: 0.8;
+  animation: confetti-fall 5s linear infinite;
+}
+
+.confetti:nth-child(1) {
+  left: 10%;
+  animation-delay: 0s;
+  background: #ff5252;
+}
+.confetti:nth-child(2) {
+  left: 20%;
+  animation-delay: 0.5s;
+  background: #ffeb3b;
+}
+.confetti:nth-child(3) {
+  left: 30%;
+  animation-delay: 1s;
+  background: #4caf50;
+}
+.confetti:nth-child(4) {
+  left: 40%;
+  animation-delay: 1.5s;
+  background: #2196f3;
+}
+.confetti:nth-child(5) {
+  left: 50%;
+  animation-delay: 2s;
+  background: #9c27b0;
+}
+.confetti:nth-child(6) {
+  left: 60%;
+  animation-delay: 2.5s;
+  background: #ff5252;
+}
+.confetti:nth-child(7) {
+  left: 70%;
+  animation-delay: 3s;
+  background: #ffeb3b;
+}
+.confetti:nth-child(8) {
+  left: 80%;
+  animation-delay: 3.5s;
+  background: #4caf50;
+}
+.confetti:nth-child(9) {
+  left: 90%;
+  animation-delay: 4s;
+  background: #2196f3;
+}
+.confetti:nth-child(10) {
+  left: 100%;
+  animation-delay: 4.5s;
+  background: #9c27b0;
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-100px) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(400px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* Day Curhat Styling */
+.day-curhat {
+  background-color: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  margin-top: 10px;
+  border-left: 3px solid var(--primary-color);
+}
+
+.day-curhat p {
+  font-style: italic;
+  color: #555;
 }
