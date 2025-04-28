@@ -96,6 +96,8 @@
             </nav>
             <div class="user-info">
                 <span id="user-display"></span>
+                <!-- Tombol Admin Menu (tersembunyi secara default) -->
+                <button id="admin-menu-btn" class="btn-small admin-btn hidden">Login Info</button>
                 <button id="logout-btn" class="btn-small">Logout</button>
             </div>
         </header>
@@ -257,6 +259,14 @@
                             <i class="fas fa-heart"></i>
                         </div>
                     </div>
+                </div>
+            </section>
+            
+            <!-- Login Info Page (Halaman Admin) -->
+            <section id="login-info" class="page hidden">
+                <h2>Informasi Login Pengguna</h2>
+                <div id="login-info-content" class="login-info-content">
+                    <p>Memuat data login...</p>
                 </div>
             </section>
         </main>
