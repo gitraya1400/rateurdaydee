@@ -9,12 +9,15 @@ import {
   where,
   addDoc,
   serverTimestamp,
+  orderBy,
+  limit,
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"
 
 // User credentials - simple username/password pairs
 const validUsers = [
   { username: "icha", password: "110406" },
   { username: "raya", password: "140405" },
+  { username: "admin", password: "1234" }, // Tambahkan user admin
 ]
 
 // DOM Elements
@@ -43,6 +46,9 @@ const specialDatePopup = document.getElementById("special-date-popup")
 const specialDateTitle = document.getElementById("special-date-title")
 const specialDateMessage = document.getElementById("special-date-message")
 const celebrationAnimation = document.getElementById("celebration-animation")
+const adminMenuBtn = document.getElementById("admin-menu-btn")
+const loginInfoPage = document.getElementById("login-info")
+const loginInfoContent = document.getElementById("login-info-content")
 
 // Current user and data
 let currentUser = null
@@ -67,12 +73,17 @@ function checkLoggedInUser() {
       loadAllUsersData().then(() => {
         populateUserSelector()
         showApp()
+
+        // Tampilkan menu admin jika user adalah admin
+        if (currentUser === "admin") {
+          showAdminMenu()
+        }
       })
     })
   }
 }
 
-// Login form submission
+// Login form submission - update to ensure each login is recorded
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault()
 
@@ -91,9 +102,13 @@ loginForm.addEventListener("submit", async (e) => {
     localStorage.setItem("rememberMe", rememberMe)
 
     try {
+      // Record login with timestamp - this will create a new document for each login
+      // even if it's the same user logging in multiple times
       await addDoc(collection(db, "loginLogs"), {
         username: username,
         timestamp: serverTimestamp(),
+        device: navigator.userAgent, // Add device info
+        loginTime: new Date().toLocaleString(), // Add human-readable time
       })
       console.log("Login log saved for:", username)
     } catch (error) {
@@ -105,6 +120,11 @@ loginForm.addEventListener("submit", async (e) => {
     populateUserSelector()
     showApp()
     console.log("App should be visible now")
+
+    // Tampilkan menu admin jika user adalah admin
+    if (currentUser === "admin") {
+      showAdminMenu()
+    }
   } else {
     // Show error message if login fails
     loginError.textContent = "Username atau password salah!"
@@ -118,6 +138,11 @@ logoutBtn.addEventListener("click", () => {
   localStorage.setItem("rememberMe", false)
   currentUser = null
   showLogin()
+
+  // Sembunyikan menu admin saat logout
+  if (adminMenuBtn) {
+    adminMenuBtn.classList.add("hidden")
+  }
 })
 
 // Navigation
@@ -142,8 +167,78 @@ navLinks.forEach((link) => {
     if (pageId === "kalender") {
       renderCalendar()
     }
+
+    // Jika halaman login info dipilih, muat data login
+    if (pageId === "login-info") {
+      loadLoginInfo()
+    }
   })
 })
+
+// Fungsi untuk menampilkan menu admin
+function showAdminMenu() {
+  if (adminMenuBtn) {
+    adminMenuBtn.classList.remove("hidden")
+  }
+}
+
+// Fungsi untuk memuat informasi login
+async function loadLoginInfo() {
+  if (currentUser !== "admin") return
+
+  try {
+    loginInfoContent.innerHTML = "<p>Memuat data login...</p>"
+
+    // Ambil data login dari Firestore
+    const q = query(collection(db, "loginLogs"), orderBy("timestamp", "desc"), limit(100))
+
+    const querySnapshot = await getDocs(q)
+
+    if (querySnapshot.empty) {
+      loginInfoContent.innerHTML = "<p>Tidak ada data login yang tersedia.</p>"
+      return
+    }
+
+    // Buat tabel untuk menampilkan data
+    let tableHTML = `
+      <table class="login-table">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Waktu Login</th>
+            <th>Perangkat</th>
+          </tr>
+        </thead>
+        <tbody>
+    `
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data()
+      const username = data.username || "Unknown"
+      const loginTime =
+        data.loginTime || (data.timestamp ? new Date(data.timestamp.toDate()).toLocaleString() : "Unknown")
+      const device = data.device || "Unknown"
+
+      tableHTML += `
+        <tr>
+          <td>${username}</td>
+          <td>${loginTime}</td>
+          <td class="device-info">${device}</td>
+        </tr>
+      `
+    })
+
+    tableHTML += `
+        </tbody>
+      </table>
+    `
+
+    loginInfoContent.innerHTML = tableHTML
+  } catch (error) {
+    console.error("Error loading login info:", error)
+    loginInfoContent.innerHTML = `<p>Error: Gagal memuat data login. ${error.message}</p>`
+  }
+}
 
 // User selector change
 userSelector.addEventListener("change", function () {
@@ -384,7 +479,7 @@ function showSpecialDatePopup(day, month, year) {
   if (isAnniversaryDate(day, month, year)) {
     // Anniversary date (August 11)
     const yearsSince = getYearsSinceAnniversary()
-    specialDateTitle.textContent = "🎉 Pixie's Day 🎉"
+    specialDateTitle.textContent = "🎉 Hari Jadi Kita! 🎉"
     specialDateMessage.textContent = `Hi kita udah ${yearsSince} tahun ni, inget terus yaaa`
     celebrationAnimation.classList.remove("hidden")
   } else if (isSpecialDate(day, month, year)) {
@@ -619,6 +714,25 @@ document.addEventListener("DOMContentLoaded", () => {
   if (specialDateCloseBtn) {
     specialDateCloseBtn.addEventListener("click", () => {
       specialDatePopup.classList.add("hidden")
+    })
+  }
+
+  // Tambahkan event listener untuk tombol menu admin
+  if (adminMenuBtn) {
+    adminMenuBtn.addEventListener("click", (e) => {
+      e.preventDefault()
+
+      // Remove active class from all links
+      navLinks.forEach((l) => l.classList.remove("active"))
+
+      // Hide all pages
+      pages.forEach((page) => page.classList.add("hidden"))
+
+      // Show login info page
+      loginInfoPage.classList.remove("hidden")
+
+      // Load login info
+      loadLoginInfo()
     })
   }
 
