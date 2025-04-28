@@ -39,6 +39,10 @@ const dayDetails = document.getElementById("day-details")
 const selectedDate = document.getElementById("selected-date")
 const dayContent = document.getElementById("day-content")
 const userSelector = document.getElementById("user-selector")
+const specialDatePopup = document.getElementById("special-date-popup")
+const specialDateTitle = document.getElementById("special-date-title")
+const specialDateMessage = document.getElementById("special-date-message")
+const celebrationAnimation = document.getElementById("celebration-animation")
 
 // Current user and data
 let currentUser = null
@@ -101,378 +105,456 @@ loginForm.addEventListener("submit", async (e) => {
     populateUserSelector()
     showApp()
     console.log("App should be visible now")
+  } else {
+    // Show error message if login fails
+    loginError.textContent = "Username atau password salah!"
+    console.log("Login failed for user:", username)
   }
+})
 
-  // Logout button
-  logoutBtn.addEventListener("click", () => {
-    localStorage.removeItem("currentUser")
-    localStorage.setItem("rememberMe", false)
-    currentUser = null
-    showLogin()
-  })
+// Logout button
+logoutBtn.addEventListener("click", () => {
+  localStorage.removeItem("currentUser")
+  localStorage.setItem("rememberMe", false)
+  currentUser = null
+  showLogin()
+})
 
-  // Navigation
-  navLinks.forEach((link) => {
-    link.addEventListener("click", function (e) {
-      e.preventDefault()
-
-      // Remove active class from all links
-      navLinks.forEach((l) => l.classList.remove("active"))
-
-      // Add active class to clicked link
-      this.classList.add("active")
-
-      // Hide all pages
-      pages.forEach((page) => page.classList.add("hidden"))
-
-      // Show selected page
-      const pageId = this.getAttribute("data-page")
-      document.getElementById(pageId).classList.remove("hidden")
-
-      // If calendar page is selected, render calendar
-      if (pageId === "kalender") {
-        renderCalendar()
-      }
-    })
-  })
-
-  // User selector change
-  userSelector.addEventListener("change", function () {
-    selectedUser = this.value
-    renderCalendar()
-  })
-
-  // Populate user selector dropdown
-  function populateUserSelector() {
-    userSelector.innerHTML = ""
-
-    // Add option for all users
-    const allOption = document.createElement("option")
-    allOption.value = "all"
-    allOption.textContent = "Semua Pengguna"
-    userSelector.appendChild(allOption)
-
-    // Add option for current user
-    const currentOption = document.createElement("option")
-    currentOption.value = currentUser
-    currentOption.textContent = currentUser
-    userSelector.appendChild(currentOption)
-
-    // Add options for other users
-    validUsers.forEach((user) => {
-      if (user.username !== currentUser) {
-        const option = document.createElement("option")
-        option.value = user.username
-        option.textContent = user.username
-        userSelector.appendChild(option)
-      }
-    })
-
-    // Default to current user
-    selectedUser = currentUser
-    userSelector.value = currentUser
-  }
-
-  // Star rating
-  stars.forEach((star) => {
-    star.addEventListener("mouseover", function () {
-      const rating = Number.parseInt(this.getAttribute("data-rating"))
-      highlightStars(rating)
-    })
-
-    star.addEventListener("mouseout", () => {
-      const currentRating = Number.parseInt(ratingInput.value) || 0
-      highlightStars(currentRating)
-    })
-
-    star.addEventListener("click", function () {
-      const rating = Number.parseInt(this.getAttribute("data-rating"))
-      ratingInput.value = rating
-      highlightStars(rating)
-
-      // Show popup for low ratings (1-2)
-      if (rating <= 2) {
-        playlistPopup.classList.remove("hidden")
-      }
-    })
-  })
-
-  // Close popup
-  closePopup.addEventListener("click", () => {
-    playlistPopup.classList.add("hidden")
-  })
-
-  // Close popup when clicking outside
-  window.addEventListener("click", (e) => {
-    if (e.target === playlistPopup) {
-      playlistPopup.classList.add("hidden")
-    }
-  })
-
-  // Daily form submission
-  dailyForm.addEventListener("submit", async function (e) {
+// Navigation
+navLinks.forEach((link) => {
+  link.addEventListener("click", function (e) {
     e.preventDefault()
 
-    // Get form data
-    const formData = new FormData(this)
-    const today = new Date().toISOString().split("T")[0] // YYYY-MM-DD format
+    // Remove active class from all links
+    navLinks.forEach((l) => l.classList.remove("active"))
 
-    // Create entry object
-    const entry = {
-      makanPagi: formData.get("makan-pagi"),
-      makanSiang: formData.get("makan-siang"),
-      makanMalam: formData.get("makan-malam"),
-      jajan: formData.get("jajan"),
-      foods: Array.from(formData.getAll("food")),
-      rating: Number.parseInt(formData.get("rating")),
-      curhat: formData.get("curhat"), // <-- Tambahan ini
-      date: today,
-      user: currentUser,
-      timestamp: new Date().toISOString(),
+    // Add active class to clicked link
+    this.classList.add("active")
+
+    // Hide all pages
+    pages.forEach((page) => page.classList.add("hidden"))
+
+    // Show selected page
+    const pageId = this.getAttribute("data-page")
+    document.getElementById(pageId).classList.remove("hidden")
+
+    // If calendar page is selected, render calendar
+    if (pageId === "kalender") {
+      renderCalendar()
     }
+  })
+})
 
-    try {
-      // Save to Firestore
-      await setDoc(doc(db, "entries", `${currentUser}_${today}`), entry)
+// User selector change
+userSelector.addEventListener("change", function () {
+  selectedUser = this.value
+  renderCalendar()
+})
 
-      // Update local data
-      userData[today] = entry
-      allUsersData[currentUser] = allUsersData[currentUser] || {}
-      allUsersData[currentUser][today] = entry
+// Populate user selector dropdown
+function populateUserSelector() {
+  userSelector.innerHTML = ""
 
-      // Show success message
-      alert("Data berhasil disimpan!")
+  // Add option for all users
+  const allOption = document.createElement("option")
+  allOption.value = "all"
+  allOption.textContent = "Semua Pengguna"
+  userSelector.appendChild(allOption)
 
-      // Reset form
-      this.reset()
-      ratingInput.value = ""
-      highlightStars(0)
-    } catch (error) {
-      console.error("Error saving data:", error)
-      alert("Gagal menyimpan data: " + error.message)
+  // Add option for current user
+  const currentOption = document.createElement("option")
+  currentOption.value = currentUser
+  currentOption.textContent = currentUser
+  userSelector.appendChild(currentOption)
+
+  // Add options for other users
+  validUsers.forEach((user) => {
+    if (user.username !== currentUser) {
+      const option = document.createElement("option")
+      option.value = user.username
+      option.textContent = user.username
+      userSelector.appendChild(option)
     }
   })
 
-  // Calendar navigation
-  prevMonthBtn.addEventListener("click", () => {
-    currentMonth--
-    if (currentMonth < 0) {
-      currentMonth = 11
-      currentYear--
-    }
-    renderCalendar()
+  // Default to current user
+  selectedUser = currentUser
+  userSelector.value = currentUser
+}
+
+// Star rating
+stars.forEach((star) => {
+  star.addEventListener("mouseover", function () {
+    const rating = Number.parseInt(this.getAttribute("data-rating"))
+    highlightStars(rating)
   })
 
-  nextMonthBtn.addEventListener("click", () => {
-    currentMonth++
-    if (currentMonth > 11) {
-      currentMonth = 0
-      currentYear++
-    }
-    renderCalendar()
+  star.addEventListener("mouseout", () => {
+    const currentRating = Number.parseInt(ratingInput.value) || 0
+    highlightStars(currentRating)
   })
 
-  // Helper Functions
-  function showLogin() {
-    loginContainer.classList.remove("hidden")
-    appContainer.classList.add("hidden")
+  star.addEventListener("click", function () {
+    const rating = Number.parseInt(this.getAttribute("data-rating"))
+    ratingInput.value = rating
+    highlightStars(rating)
+
+    // Show popup for low ratings (1-2)
+    if (rating <= 2) {
+      playlistPopup.classList.remove("hidden")
+    }
+  })
+})
+
+// Close popup
+closePopup.addEventListener("click", () => {
+  playlistPopup.classList.add("hidden")
+})
+
+// Close popup when clicking outside
+window.addEventListener("click", (e) => {
+  if (e.target === playlistPopup) {
+    playlistPopup.classList.add("hidden")
   }
 
-  function showApp() {
-    console.log("Showing app, hiding login")
-    loginContainer.classList.add("hidden")
-    appContainer.classList.remove("hidden")
-    userDisplay.textContent = `Halo, ${currentUser}!`
+  if (e.target === specialDatePopup) {
+    specialDatePopup.classList.add("hidden")
+  }
+})
+
+// Daily form submission
+dailyForm.addEventListener("submit", async function (e) {
+  e.preventDefault()
+
+  // Get form data
+  const formData = new FormData(this)
+  const today = new Date().toISOString().split("T")[0] // YYYY-MM-DD format
+
+  // Create entry object
+  const entry = {
+    makanPagi: formData.get("makan-pagi"),
+    makanSiang: formData.get("makan-siang"),
+    makanMalam: formData.get("makan-malam"),
+    jajan: formData.get("jajan"),
+    foods: Array.from(formData.getAll("food")),
+    rating: Number.parseInt(formData.get("rating")),
+    curhat: formData.get("curhat"), // <-- Tambahan ini
+    date: today,
+    user: currentUser,
+    timestamp: new Date().toISOString(),
   }
 
-  function highlightStars(rating) {
-    stars.forEach((star) => {
-      const starRating = Number.parseInt(star.getAttribute("data-rating"))
-      if (starRating <= rating) {
-        star.classList.add("active")
-      } else {
-        star.classList.remove("active")
-      }
+  try {
+    // Save to Firestore
+    await setDoc(doc(db, "entries", `${currentUser}_${today}`), entry)
+
+    // Update local data
+    userData[today] = entry
+    allUsersData[currentUser] = allUsersData[currentUser] || {}
+    allUsersData[currentUser][today] = entry
+
+    // Show success message
+    alert("Data berhasil disimpan!")
+
+    // Reset form
+    this.reset()
+    ratingInput.value = ""
+    highlightStars(0)
+  } catch (error) {
+    console.error("Error saving data:", error)
+    alert("Gagal menyimpan data: " + error.message)
+  }
+})
+
+// Calendar navigation
+prevMonthBtn.addEventListener("click", () => {
+  currentMonth--
+  if (currentMonth < 0) {
+    currentMonth = 11
+    currentYear--
+  }
+  renderCalendar()
+})
+
+nextMonthBtn.addEventListener("click", () => {
+  currentMonth++
+  if (currentMonth > 11) {
+    currentMonth = 0
+    currentYear++
+  }
+  renderCalendar()
+})
+
+// Helper Functions
+function showLogin() {
+  loginContainer.classList.remove("hidden")
+  appContainer.classList.add("hidden")
+}
+
+function showApp() {
+  console.log("Showing app, hiding login")
+  loginContainer.classList.add("hidden")
+  appContainer.classList.remove("hidden")
+  userDisplay.textContent = `Halo, ${currentUser}!`
+}
+
+function highlightStars(rating) {
+  stars.forEach((star) => {
+    const starRating = Number.parseInt(star.getAttribute("data-rating"))
+    if (starRating <= rating) {
+      star.classList.add("active")
+    } else {
+      star.classList.remove("active")
+    }
+  })
+}
+
+async function loadUserData() {
+  try {
+    // Query Firestore for current user's entries
+    const q = query(collection(db, "entries"), where("user", "==", currentUser))
+
+    const querySnapshot = await getDocs(q)
+    userData = {}
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data()
+      userData[data.date] = data
     })
+  } catch (error) {
+    console.error("Error loading user data:", error)
+    userData = {}
   }
+}
 
-  async function loadUserData() {
-    try {
-      // Query Firestore for current user's entries
-      const q = query(collection(db, "entries"), where("user", "==", currentUser))
+async function loadAllUsersData() {
+  try {
+    // Get all entries
+    const querySnapshot = await getDocs(collection(db, "entries"))
+    allUsersData = {}
 
-      const querySnapshot = await getDocs(q)
-      userData = {}
+    querySnapshot.forEach((doc) => {
+      const data = doc.data()
+      const user = data.user
+      const date = data.date
 
-      querySnapshot.forEach((doc) => {
-        const data = doc.data()
-        userData[data.date] = data
-      })
-    } catch (error) {
-      console.error("Error loading user data:", error)
-      userData = {}
-    }
-  }
-
-  async function loadAllUsersData() {
-    try {
-      // Get all entries
-      const querySnapshot = await getDocs(collection(db, "entries"))
-      allUsersData = {}
-
-      querySnapshot.forEach((doc) => {
-        const data = doc.data()
-        const user = data.user
-        const date = data.date
-
-        if (!allUsersData[user]) {
-          allUsersData[user] = {}
-        }
-
-        allUsersData[user][date] = data
-      })
-    } catch (error) {
-      console.error("Error loading all users data:", error)
-      allUsersData = {}
-    }
-  }
-
-  function renderCalendar() {
-    // Update month and year display
-    const monthNames = [
-      "Januari",
-      "Februari",
-      "Maret",
-      "April",
-      "Mei",
-      "Juni",
-      "Juli",
-      "Agustus",
-      "September",
-      "Oktober",
-      "November",
-      "Desember",
-    ]
-    currentMonthDisplay.textContent = `${monthNames[currentMonth]} ${currentYear}`
-
-    // Clear previous calendar
-    calendarDays.innerHTML = ""
-
-    // Get first day of month and number of days
-    const firstDay = new Date(currentYear, currentMonth, 1).getDay()
-    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate()
-
-    // Add empty cells for days before first day of month
-    for (let i = 0; i < firstDay; i++) {
-      const emptyDay = document.createElement("div")
-      calendarDays.appendChild(emptyDay)
-    }
-
-    // Add days of month
-    for (let day = 1; day <= daysInMonth; day++) {
-      const dayElement = document.createElement("div")
-      dayElement.classList.add("calendar-day")
-      dayElement.textContent = day
-
-      // Format date string
-      const dateString = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
-
-      // Check if day has entry based on selected user
-      let hasEntry = false
-      let rating = 0
-
-      if (selectedUser === "all") {
-        // Check all users for entries on this date
-        for (const user in allUsersData) {
-          if (allUsersData[user][dateString]) {
-            hasEntry = true
-            // Use the highest rating if multiple users have entries
-            const userRating = allUsersData[user][dateString].rating || 0
-            rating = Math.max(rating, userRating)
-          }
-        }
-      } else {
-        // Check only selected user
-        const userEntries = allUsersData[selectedUser] || {}
-        if (userEntries[dateString]) {
-          hasEntry = true
-          rating = userEntries[dateString].rating || 0
-        }
+      if (!allUsersData[user]) {
+        allUsersData[user] = {}
       }
 
-      if (hasEntry) {
-        dayElement.classList.add("has-entry")
+      allUsersData[user][date] = data
+    })
+  } catch (error) {
+    console.error("Error loading all users data:", error)
+    allUsersData = {}
+  }
+}
 
-        // Add color based on rating
-        if (rating) {
-          dayElement.classList.add(`rating-${rating}`)
-        }
-      }
+// Check if a date is the 11th of any month
+function isSpecialDate(day, month, year) {
+  return day === 11
+}
 
-      // Add click event to show day details
-      dayElement.addEventListener("click", () => {
-        showDayDetails(dateString, day)
-      })
+// Check if a date is August 11th (anniversary)
+function isAnniversaryDate(day, month, year) {
+  return day === 11 && month === 7 // August is month 7 (0-indexed)
+}
 
-      calendarDays.appendChild(dayElement)
-    }
+// Calculate months since April 11, 2025
+function getMonthsSinceBreakup() {
+  const breakupDate = new Date(2025, 3, 11) // April 11, 2025
+  const now = new Date()
+
+  const yearDiff = now.getFullYear() - breakupDate.getFullYear()
+  const monthDiff = now.getMonth() - breakupDate.getMonth()
+
+  return yearDiff * 12 + monthDiff
+}
+
+// Calculate years since 2022
+function getYearsSinceAnniversary() {
+  const anniversaryYear = 2022
+  const currentYear = new Date().getFullYear()
+
+  return currentYear - anniversaryYear
+}
+
+// Show special date popup
+function showSpecialDatePopup(day, month, year) {
+  if (isAnniversaryDate(day, month, year)) {
+    // Anniversary date (August 11)
+    const yearsSince = getYearsSinceAnniversary()
+    specialDateTitle.textContent = "🎉 Hari Jadi Kita! 🎉"
+    specialDateMessage.textContent = `Hi kita udah ${yearsSince} tahun ni, inget terus yaaa`
+    celebrationAnimation.classList.remove("hidden")
+  } else if (isSpecialDate(day, month, year)) {
+    // Regular special date (11th of any month)
+    const monthsSince = getMonthsSinceBreakup()
+    specialDateTitle.textContent = "❤️ Tanggal 11 ❤️"
+    specialDateMessage.textContent = `Hi ingat ga ya dee ktg putus tanggal ini, udah ${monthsSince} bulan`
+    celebrationAnimation.classList.add("hidden")
   }
 
-  function showDayDetails(dateString, day) {
-    // Show day details section
-    dayDetails.classList.remove("hidden")
+  specialDatePopup.classList.remove("hidden")
+}
 
-    // Set selected date
-    const monthNames = [
-      "Januari",
-      "Februari",
-      "Maret",
-      "April",
-      "Mei",
-      "Juni",
-      "Juli",
-      "Agustus",
-      "September",
-      "Oktober",
-      "November",
-      "Desember",
-    ]
-    selectedDate.textContent = `${day} ${monthNames[currentMonth]} ${currentYear}`
+function renderCalendar() {
+  // Update month and year display
+  const monthNames = [
+    "Januari",
+    "Februari",
+    "Maret",
+    "April",
+    "Mei",
+    "Juni",
+    "Juli",
+    "Agustus",
+    "September",
+    "Oktober",
+    "November",
+    "Desember",
+  ]
+  currentMonthDisplay.textContent = `${monthNames[currentMonth]} ${currentYear}`
 
-    // Clear previous content
-    dayContent.innerHTML = ""
+  // Clear previous calendar
+  calendarDays.innerHTML = ""
 
-    // Get entries for this date based on selected user
-    const entries = []
+  // Get first day of month and number of days
+  const firstDay = new Date(currentYear, currentMonth, 1).getDay()
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate()
+
+  // Add empty cells for days before first day of month
+  for (let i = 0; i < firstDay; i++) {
+    const emptyDay = document.createElement("div")
+    calendarDays.appendChild(emptyDay)
+  }
+
+  // Add days of month
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dayElement = document.createElement("div")
+    dayElement.classList.add("calendar-day")
+    dayElement.textContent = day
+
+    // Format date string
+    const dateString = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+
+    // Check if day has entry based on selected user
+    let hasEntry = false
+    let rating = 0
 
     if (selectedUser === "all") {
-      // Get all users' entries for this date
+      // Check all users for entries on this date
       for (const user in allUsersData) {
         if (allUsersData[user][dateString]) {
-          entries.push({
-            user: user,
-            data: allUsersData[user][dateString],
-          })
+          hasEntry = true
+          // Use the highest rating if multiple users have entries
+          const userRating = allUsersData[user][dateString].rating || 0
+          rating = Math.max(rating, userRating)
         }
       }
     } else {
-      // Get only selected user's entry
+      // Check only selected user
       const userEntries = allUsersData[selectedUser] || {}
       if (userEntries[dateString]) {
-        entries.push({
-          user: selectedUser,
-          data: userEntries[dateString],
-        })
+        hasEntry = true
+        rating = userEntries[dateString].rating || 0
       }
     }
 
-    if (entries.length > 0) {
-      // Create content for each entry
-      entries.forEach((entry, index) => {
-        const data = entry.data
-        const user = entry.user
+    if (hasEntry) {
+      dayElement.classList.add("has-entry")
 
-        let entryContent = `
+      // Add color based on rating
+      if (rating) {
+        dayElement.classList.add(`rating-${rating}`)
+      }
+    }
+
+    // Check if this is a special date (11th of any month)
+    if (isSpecialDate(day, currentMonth, currentYear)) {
+      dayElement.classList.add("special-date")
+
+      // Check if this is an anniversary date (August 11th)
+      if (isAnniversaryDate(day, currentMonth, currentYear)) {
+        dayElement.classList.add("anniversary-date")
+
+        // Add celebration animation
+        const highlight = document.createElement("div")
+        highlight.classList.add("anniversary-highlight")
+        dayElement.appendChild(highlight)
+      }
+    }
+
+    // Add click event to show day details
+    dayElement.addEventListener("click", () => {
+      // Show regular day details
+      showDayDetails(dateString, day)
+
+      // If it's a special date, also show the special popup
+      if (isSpecialDate(day, currentMonth, currentYear)) {
+        showSpecialDatePopup(day, currentMonth, currentYear)
+      }
+    })
+
+    calendarDays.appendChild(dayElement)
+  }
+}
+
+function showDayDetails(dateString, day) {
+  // Show day details section
+  dayDetails.classList.remove("hidden")
+
+  // Set selected date
+  const monthNames = [
+    "Januari",
+    "Februari",
+    "Maret",
+    "April",
+    "Mei",
+    "Juni",
+    "Juli",
+    "Agustus",
+    "September",
+    "Oktober",
+    "November",
+    "Desember",
+  ]
+  selectedDate.textContent = `${day} ${monthNames[currentMonth]} ${currentYear}`
+
+  // Clear previous content
+  dayContent.innerHTML = ""
+
+  // Get entries for this date based on selected user
+  const entries = []
+
+  if (selectedUser === "all") {
+    // Get all users' entries for this date
+    for (const user in allUsersData) {
+      if (allUsersData[user][dateString]) {
+        entries.push({
+          user: user,
+          data: allUsersData[user][dateString],
+        })
+      }
+    }
+  } else {
+    // Get only selected user's entry
+    const userEntries = allUsersData[selectedUser] || {}
+    if (userEntries[dateString]) {
+      entries.push({
+        user: selectedUser,
+        data: userEntries[dateString],
+      })
+    }
+  }
+
+  if (entries.length > 0) {
+    // Create content for each entry
+    entries.forEach((entry, index) => {
+      const data = entry.data
+      const user = entry.user
+
+      let entryContent = `
         <div class="day-entry">
           <h4>${user === currentUser ? "Aktivitas Kamu" : "Aktivitas " + user}</h4>
           <p>Makan Pagi: ${data.makanPagi === "ya" ? "✅" : "❌"}</p>
@@ -481,57 +563,64 @@ loginForm.addEventListener("submit", async (e) => {
           <p>Jajan: ${data.jajan === "ya" ? "✅" : "❌"}</p>
       `
 
-        if (data.foods && data.foods.length > 0) {
-          entryContent += `
+      if (data.foods && data.foods.length > 0) {
+        entryContent += `
           <h4>Makanan yang Dipilih</h4>
           <ul>
             ${data.foods.map((food) => `<li>${food}</li>`).join("")}
           </ul>
         `
-        }
+      }
 
-        if (data.rating) {
-          entryContent += `
+      if (data.rating) {
+        entryContent += `
           <h4>Rating Hari</h4>
           <div class="day-rating">
             ${Array(data.rating).fill("⭐").join("")}
           </div>
         `
-        }
+      }
 
-        if (data.curhat) {
-          entryContent += `
+      if (data.curhat) {
+        entryContent += `
           <h4>Curhat</h4>
           <div class="day-curhat">
             <p>${data.curhat}</p>
           </div>
         `
-        }
+      }
 
-        entryContent += `</div>`
+      entryContent += `</div>`
 
-        // Add a separator between entries
-        if (index < entries.length - 1) {
-          entryContent += `<hr class="entry-separator">`
-        }
+      // Add a separator between entries
+      if (index < entries.length - 1) {
+        entryContent += `<hr class="entry-separator">`
+      }
 
-        dayContent.innerHTML += entryContent
-      })
-    } else {
-      dayContent.innerHTML = "<p>Tidak ada data untuk tanggal ini.</p>"
-    }
+      dayContent.innerHTML += entryContent
+    })
+  } else {
+    dayContent.innerHTML = "<p>Tidak ada data untuk tanggal ini.</p>"
+  }
+}
+
+// Initialize
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("DOM loaded")
+
+  // Check if elements exist
+  if (!loginContainer) console.error("loginContainer not found")
+  if (!appContainer) console.error("appContainer not found")
+  if (!loginForm) console.error("loginForm not found")
+  if (!userDisplay) console.error("userDisplay not found")
+
+  // Close special date popup when clicking X
+  const specialDateCloseBtn = specialDatePopup.querySelector(".close-popup")
+  if (specialDateCloseBtn) {
+    specialDateCloseBtn.addEventListener("click", () => {
+      specialDatePopup.classList.add("hidden")
+    })
   }
 
-  // Initialize
-  document.addEventListener("DOMContentLoaded", () => {
-    console.log("DOM loaded")
-
-    // Check if elements exist
-    if (!loginContainer) console.error("loginContainer not found")
-    if (!appContainer) console.error("appContainer not found")
-    if (!loginForm) console.error("loginForm not found")
-    if (!userDisplay) console.error("userDisplay not found")
-
-    checkLoggedInUser()
-  })
+  checkLoggedInUser()
 })
