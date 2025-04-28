@@ -8,6 +8,55 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
+    <!-- 3D Animations Container -->
+    <div class="animations-container">
+        <!-- Cute Whale -->
+        <div class="whale-animation">
+            <div class="whale-body"></div>
+            <div class="whale-eye"></div>
+            <div class="whale-tail"></div>
+        </div>
+        
+        <!-- Seagull -->
+        <div class="seagull-animation">
+            <div class="seagull-body"></div>
+            <div class="seagull-wing-left"></div>
+            <div class="seagull-wing-right"></div>
+            <div class="seagull-head"></div>
+            <div class="seagull-beak"></div>
+        </div>
+        
+        <!-- White Lily -->
+        <div class="lily-animation">
+            <div class="lily-stem"></div>
+            <div class="lily-flower">
+                <div class="lily-petal"></div>
+                <div class="lily-petal"></div>
+                <div class="lily-petal"></div>
+                <div class="lily-petal"></div>
+                <div class="lily-petal"></div>
+                <div class="lily-center"></div>
+            </div>
+        </div>
+        
+        <!-- Goose -->
+        <div class="goose-animation">
+            <div class="goose-body"></div>
+            <div class="goose-neck"></div>
+            <div class="goose-head"></div>
+            <div class="goose-beak"></div>
+        </div>
+        
+        <!-- Betta Fish -->
+        <div class="betta-animation">
+            <div class="betta-body"></div>
+            <div class="betta-tail"></div>
+            <div class="betta-fin-top"></div>
+            <div class="betta-fin-bottom"></div>
+            <div class="betta-eye"></div>
+        </div>
+    </div>
+
     <!-- Login Page -->
     <div id="login-container" class="container">
         <div class="login-form">
@@ -232,6 +281,27 @@
                     <img src="playlist2.jpg" alt="Playlist 2">
                     <a href="https://open.spotify.com/playlist/4bexyPcwfp7h0kNvPOM1LD?si=LENxyaYYSTqgNyeFOnRmOA&pi=sE5wvy22ROaoE" target="_blank"> Mood Booster</a>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Special Date Popup -->
+    <div id="special-date-popup" class="popup hidden">
+        <div class="popup-content">
+            <span class="close-popup">&times;</span>
+            <h3 id="special-date-title"></h3>
+            <p id="special-date-message"></p>
+            <div id="celebration-animation" class="confetti-container hidden">
+                <div class="confetti"></div>
+                <div class="confetti"></div>
+                <div class="confetti"></div>
+                <div class="confetti"></div>
+                <div class="confetti"></div>
+                <div class="confetti"></div>
+                <div class="confetti"></div>
+                <div class="confetti"></div>
+                <div class="confetti"></div>
+                <div class="confetti"></div>
             </div>
         </div>
     </div>
