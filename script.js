@@ -177,14 +177,23 @@ navLinks.forEach((link) => {
 
 // Fungsi untuk menampilkan menu admin
 function showAdminMenu() {
+  const adminMenuBtn = document.getElementById("admin-menu-btn")
   if (adminMenuBtn) {
     adminMenuBtn.classList.remove("hidden")
+  } else {
+    console.error("Admin menu button tidak ditemukan!")
   }
 }
 
 // Fungsi untuk memuat informasi login
 async function loadLoginInfo() {
   if (currentUser !== "admin") return
+
+  const loginInfoContent = document.getElementById("login-info-content")
+  if (!loginInfoContent) {
+    console.error("Elemen login-info-content tidak ditemukan!")
+    return
+  }
 
   try {
     loginInfoContent.innerHTML = "<p>Memuat data login...</p>"
@@ -718,6 +727,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Tambahkan event listener untuk tombol menu admin
+  const adminMenuBtn = document.getElementById("admin-menu-btn")
   if (adminMenuBtn) {
     adminMenuBtn.addEventListener("click", (e) => {
       e.preventDefault()
@@ -729,10 +739,14 @@ document.addEventListener("DOMContentLoaded", () => {
       pages.forEach((page) => page.classList.add("hidden"))
 
       // Show login info page
-      loginInfoPage.classList.remove("hidden")
-
-      // Load login info
-      loadLoginInfo()
+      const loginInfoPage = document.getElementById("login-info")
+      if (loginInfoPage) {
+        loginInfoPage.classList.remove("hidden")
+        // Load login info
+        loadLoginInfo()
+      } else {
+        console.error("Halaman login info tidak ditemukan!")
+      }
     })
   }
 
