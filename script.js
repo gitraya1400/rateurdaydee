@@ -384,7 +384,7 @@ function showSpecialDatePopup(day, month, year) {
   if (isAnniversaryDate(day, month, year)) {
     // Anniversary date (August 11)
     const yearsSince = getYearsSinceAnniversary()
-    specialDateTitle.textContent = "🎉 Hari Jadi Kita! 🎉"
+    specialDateTitle.textContent = "🎉 Pixie's Day 🎉"
     specialDateMessage.textContent = `Hi kita udah ${yearsSince} tahun ni, inget terus yaaa`
     celebrationAnimation.classList.remove("hidden")
   } else if (isSpecialDate(day, month, year)) {
