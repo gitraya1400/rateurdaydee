@@ -5,13 +5,13 @@ import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID",
-  measurementId: "YOUR_MEASUREMENT_ID",
+  apiKey: "AIzaSyCi__dxnREoUYqjgklElumTELG2eJp1r_0",
+  authDomain: "howsureday.firebaseapp.com",
+  projectId: "howsureday",
+  storageBucket: "howsureday.firebasestore.com",
+  messagingSenderId: "1055749509398",
+  appId: "1:1055749509398:web:e0a720bb77401b76b38037",
+  measurementId: "G-P3M6GZ4ZRG",
 }
 
 // Initialize Firebase
