@@ -590,6 +590,78 @@ footer {
   text-overflow: ellipsis;
 }
 
+/* Camera and Image Upload Styling */
+.image-upload-container {
+  margin-top: 15px;
+}
+
+.image-upload-buttons {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.or-divider {
+  margin: 0 15px;
+  color: #777;
+}
+
+.camera-container {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto 20px;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+#camera-preview {
+  width: 100%;
+  height: auto;
+  background-color: #f0f0f0;
+  display: block;
+}
+
+.camera-controls {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding: 10px;
+  background-color: #f9f9f9;
+}
+
+.image-preview-container {
+  margin-top: 15px;
+  text-align: center;
+}
+
+#image-preview {
+  max-width: 100%;
+  max-height: 300px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  margin-bottom: 10px;
+}
+
+#take-photo-btn {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+#take-photo-btn:hover {
+  background-color: #ff5252;
+}
+
+#capture-photo {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+#cancel-camera {
+  background-color: var(--dark-color);
+  color: white;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .about-content {
@@ -659,6 +731,15 @@ footer {
 
   .device-info {
     max-width: 100px;
+  }
+
+  .image-upload-buttons {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .or-divider {
+    margin: 5px 0;
   }
 }
 
