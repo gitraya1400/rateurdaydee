@@ -227,13 +227,24 @@
                         <div class="form-group">
                             <label for="emotion-image">Upload gambar yang menggambarkan perasaanmu (opsional)</label>
                             <div class="image-upload-container">
+                              <div class="image-upload-buttons">
+                                <button type="button" id="take-photo-btn" class="btn-small">Ambil Foto</button>
+                                <span class="or-divider">atau</span>
                                 <input type="file" id="emotion-image" name="emotion-image" accept="image/*" class="image-upload-input">
-                                <div class="image-preview-container">
-                                    <img id="image-preview" src="#" alt="Preview" class="hidden">
-                                    <button type="button" id="remove-image" class="btn-small hidden">Hapus Gambar</button>
+                              </div>
+                              <div class="camera-container hidden">
+                                <video id="camera-preview" autoplay playsinline></video>
+                                <div class="camera-controls">
+                                  <button type="button" id="capture-photo" class="btn-small">Ambil</button>
+                                  <button type="button" id="cancel-camera" class="btn-small">Batal</button>
                                 </div>
+                              </div>
+                              <div class="image-preview-container">
+                                <img id="image-preview" src="#" alt="Preview" class="hidden">
+                                <button type="button" id="remove-image" class="btn-small hidden">Hapus Gambar</button>
+                              </div>
                             </div>
-                        </div>
+                          </div>
                     </div>
 
                     <button type="submit" class="btn">Simpan</button>
