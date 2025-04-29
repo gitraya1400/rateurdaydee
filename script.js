@@ -12,12 +12,7 @@ import {
   orderBy,
   limit,
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"
-import {
-  getStorage,
-  ref,
-  uploadBytes,
-  getDownloadURL,
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js"
+import { getStorage } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js"
 
 // User credentials - simple username/password pairs
 const validUsers = [
@@ -59,8 +54,8 @@ const currentDateDisplay = document.getElementById("current-date-display")
 const imageInput = document.getElementById("emotion-image")
 const imagePreview = document.getElementById("image-preview")
 const removeImageBtn = document.getElementById("remove-image")
-const imageViewerPopup = document.getElementById("image-viewer")
-const imageViewer = document.getElementById("image-viewer-image")
+const imageViewerPopup = document.getElementById("image-viewer-popup")
+const imageViewer = document.getElementById("image-viewer")
 
 // Camera elements
 const takePhotoBtn = document.getElementById("take-photo-btn")
@@ -306,33 +301,21 @@ capturePhotoBtn.addEventListener("click", () => {
     // Draw video frame to canvas
     context.drawImage(cameraPreview, 0, 0, canvas.width, canvas.height)
 
-    // Convert canvas to blob
-    canvas.toBlob(
-      (blob) => {
-        if (!blob) {
-          console.error("Failed to create blob from canvas")
-          alert("Gagal mengambil foto. Silakan coba lagi.")
-          return
-        }
+    // Convert canvas to data URL directly
+    const imageDataUrl = canvas.toDataURL("image/jpeg", 0.8)
 
-        // Create a File object from the blob with a unique name
-        const fileName = `camera-photo-${Date.now()}.jpg`
-        selectedImage = new File([blob], fileName, { type: "image/jpeg" })
+    // Store the data URL for later use
+    selectedImage = imageDataUrl
 
-        // Display preview
-        const imageUrl = URL.createObjectURL(blob)
-        imagePreview.src = imageUrl
-        imagePreview.classList.remove("hidden")
-        removeImageBtn.classList.remove("hidden")
+    // Display preview
+    imagePreview.src = imageDataUrl
+    imagePreview.classList.remove("hidden")
+    removeImageBtn.classList.remove("hidden")
 
-        // Stop camera and hide camera container
-        stopCamera()
+    // Stop camera and hide camera container
+    stopCamera()
 
-        console.log("Photo captured successfully:", fileName)
-      },
-      "image/jpeg",
-      0.9,
-    )
+    console.log("Photo captured successfully")
   } catch (error) {
     console.error("Error capturing photo:", error)
     alert("Gagal mengambil foto: " + error.message)
@@ -411,7 +394,7 @@ async function loadLoginInfo() {
     const querySnapshot = await getDocs(q)
 
     if (querySnapshot.empty) {
-      loginInfoContent.innerHTML = "<p>Tidak ada data login yang tersedia.</</p>"
+      loginInfoContent.innerHTML = "<p>Tidak ada data login yang tersedia.</p>"
       return
     }
 
@@ -537,34 +520,16 @@ window.addEventListener("click", (e) => {
   }
 })
 
-// Upload image to Firebase Storage
-async function uploadImage(file) {
-  if (!file) return null
+// Store image in Firestore directly (bypass Firebase Storage)
+async function storeImageInFirestore(imageDataUrl) {
+  if (!imageDataUrl) return null
 
   try {
-    const wibDate = getCurrentDateInWIB()
-    const dateString = formatDate(wibDate)
-
-    // Generate a unique filename
-    const fileExtension = file.name.split(".").pop() || "jpg"
-    const fileName = `${currentUser}_${dateString}_${Date.now()}.${fileExtension}`
-
-    const storageRef = ref(storage, `emotion_images/${fileName}`)
-
-    console.log("Uploading to storage:", fileName)
-
-    // Upload file
-    const snapshot = await uploadBytes(storageRef, file)
-    console.log("Uploaded image successfully")
-
-    // Get download URL
-    const downloadURL = await getDownloadURL(snapshot.ref)
-    console.log("Image URL:", downloadURL)
-
-    return downloadURL
+    // We'll store the image data URL directly in Firestore
+    // This avoids CORS issues with Firebase Storage
+    return imageDataUrl
   } catch (error) {
-    console.error("Error uploading image:", error)
-    alert("Gagal mengupload gambar: " + error.message)
+    console.error("Error storing image:", error)
     return null
   }
 }
@@ -586,6 +551,12 @@ dailyForm.addEventListener("submit", async function (e) {
   }
 
   try {
+    // Show loading indicator
+    const submitBtn = this.querySelector('button[type="submit"]')
+    const originalBtnText = submitBtn.textContent
+    submitBtn.textContent = "Menyimpan..."
+    submitBtn.disabled = true
+
     // Get form data
     const formData = new FormData(this)
 
@@ -593,11 +564,26 @@ dailyForm.addEventListener("submit", async function (e) {
     const wibDate = getCurrentDateInWIB()
     const today = formatDate(wibDate) // YYYY-MM-DD format
 
-    // Upload image if selected
+    // Process image if selected
     let imageURL = null
     if (selectedImage) {
-      console.log("Uploading image:", selectedImage.name, selectedImage.type, selectedImage.size)
-      imageURL = await uploadImage(selectedImage)
+      console.log("Processing image...")
+
+      // If selectedImage is a File object (from file input)
+      if (selectedImage instanceof File) {
+        // Convert File to data URL
+        const reader = new FileReader()
+        imageURL = await new Promise((resolve) => {
+          reader.onload = (e) => resolve(e.target.result)
+          reader.readAsDataURL(selectedImage)
+        })
+      } else if (typeof selectedImage === "string") {
+        // If selectedImage is already a data URL (from camera)
+        imageURL = selectedImage
+      }
+
+      // Store the image data URL
+      console.log("Image processed successfully")
     }
 
     // Create entry object
@@ -609,7 +595,7 @@ dailyForm.addEventListener("submit", async function (e) {
       foods: Array.from(formData.getAll("food")),
       rating: Number.parseInt(formData.get("rating")),
       curhat: formData.get("curhat") || "", // Make curhat optional
-      imageURL: imageURL, // Add image URL
+      imageURL: imageURL, // Add image data URL
       date: today,
       user: currentUser,
       timestamp: new Date().toISOString(),
@@ -638,9 +624,18 @@ dailyForm.addEventListener("submit", async function (e) {
     imagePreview.classList.add("hidden")
     removeImageBtn.classList.add("hidden")
     selectedImage = null
+
+    // Restore button
+    submitBtn.textContent = originalBtnText
+    submitBtn.disabled = false
   } catch (error) {
     console.error("Error saving data:", error)
     alert("Gagal menyimpan data: " + error.message)
+
+    // Restore button on error
+    const submitBtn = this.querySelector('button[type="submit"]')
+    submitBtn.textContent = "Simpan"
+    submitBtn.disabled = false
   }
 })
 
@@ -1000,7 +995,7 @@ function showDayDetails(dateString, day) {
         entryContent += `
           <h4>Picture Your Emotion</h4>
           <div class="day-image">
-            <img src="${data.imageURL}" alt="Emotion Picture" onclick="showImageViewer('${data.imageURL}')">
+            <img src="${data.imageURL}" alt="Emotion Picture" class="emotion-image">
           </div>
         `
       }
