@@ -62,6 +62,16 @@ const removeImageBtn = document.getElementById("remove-image")
 const imageViewerPopup = document.getElementById("image-viewer-popup")
 const imageViewer = document.getElementById("image-viewer")
 
+// Camera elements
+const takePhotoBtn = document.getElementById("take-photo-btn")
+const cameraContainer = document.querySelector(".camera-container")
+const cameraPreview = document.getElementById("camera-preview")
+const capturePhotoBtn = document.getElementById("capture-photo")
+const cancelCameraBtn = document.getElementById("cancel-camera")
+
+// Camera stream reference
+let cameraStream = null
+
 // Current user and data
 let currentUser = null
 let userData = {}
@@ -257,6 +267,102 @@ removeImageBtn.addEventListener("click", () => {
   imagePreview.classList.add("hidden")
   removeImageBtn.classList.add("hidden")
   selectedImage = null
+})
+
+// Take photo button
+takePhotoBtn.addEventListener("click", async () => {
+  try {
+    // Request camera access
+    cameraStream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: "environment", // Use back camera if available
+        width: { ideal: 1280 },
+        height: { ideal: 720 },
+      },
+    })
+
+    // Show camera preview
+    cameraPreview.srcObject = cameraStream
+    cameraContainer.classList.remove("hidden")
+
+    console.log("Camera started successfully")
+  } catch (error) {
+    console.error("Error accessing camera:", error)
+    alert("Tidak dapat mengakses kamera: " + error.message)
+  }
+})
+
+// Capture photo button
+capturePhotoBtn.addEventListener("click", () => {
+  try {
+    // Create canvas to capture the image
+    const canvas = document.createElement("canvas")
+    const context = canvas.getContext("2d")
+
+    // Set canvas dimensions to match video
+    canvas.width = cameraPreview.videoWidth
+    canvas.height = cameraPreview.videoHeight
+
+    // Draw video frame to canvas
+    context.drawImage(cameraPreview, 0, 0, canvas.width, canvas.height)
+
+    // Convert canvas to blob
+    canvas.toBlob(
+      (blob) => {
+        // Create a File object from the blob
+        selectedImage = new File([blob], "camera-photo.jpg", { type: "image/jpeg" })
+
+        // Display preview
+        const imageUrl = URL.createObjectURL(blob)
+        imagePreview.src = imageUrl
+        imagePreview.classList.remove("hidden")
+        removeImageBtn.classList.remove("hidden")
+
+        // Stop camera and hide camera container
+        stopCamera()
+
+        console.log("Photo captured successfully")
+      },
+      "image/jpeg",
+      0.9,
+    )
+  } catch (error) {
+    console.error("Error capturing photo:", error)
+    alert("Gagal mengambil foto: " + error.message)
+  }
+})
+
+// Cancel camera button
+cancelCameraBtn.addEventListener("click", () => {
+  stopCamera()
+})
+
+// Function to stop camera stream
+function stopCamera() {
+  if (cameraStream) {
+    cameraStream.getTracks().forEach((track) => track.stop())
+    cameraStream = null
+  }
+
+  cameraContainer.classList.add("hidden")
+  cameraPreview.srcObject = null
+}
+
+// Stop camera when form is submitted
+dailyForm.addEventListener("submit", () => {
+  stopCamera()
+})
+
+// Stop camera when user navigates away
+navLinks.forEach((link) => {
+  link.addEventListener("click", () => {
+    stopCamera()
+  })
+})
+
+// Stop camera when user logs out
+logoutBtn.addEventListener("click", () => {
+  stopCamera()
 })
 
 // Close image viewer popup
