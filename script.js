@@ -59,8 +59,8 @@ const currentDateDisplay = document.getElementById("current-date-display")
 const imageInput = document.getElementById("emotion-image")
 const imagePreview = document.getElementById("image-preview")
 const removeImageBtn = document.getElementById("remove-image")
-const imageViewerPopup = document.getElementById("image-viewer-popup")
-const imageViewer = document.getElementById("image-viewer")
+const imageViewerPopup = document.getElementById("image-viewer")
+const imageViewer = document.getElementById("image-viewer-image")
 
 // Camera elements
 const takePhotoBtn = document.getElementById("take-photo-btn")
@@ -309,8 +309,15 @@ capturePhotoBtn.addEventListener("click", () => {
     // Convert canvas to blob
     canvas.toBlob(
       (blob) => {
-        // Create a File object from the blob
-        selectedImage = new File([blob], "camera-photo.jpg", { type: "image/jpeg" })
+        if (!blob) {
+          console.error("Failed to create blob from canvas")
+          alert("Gagal mengambil foto. Silakan coba lagi.")
+          return
+        }
+
+        // Create a File object from the blob with a unique name
+        const fileName = `camera-photo-${Date.now()}.jpg`
+        selectedImage = new File([blob], fileName, { type: "image/jpeg" })
 
         // Display preview
         const imageUrl = URL.createObjectURL(blob)
@@ -321,7 +328,7 @@ capturePhotoBtn.addEventListener("click", () => {
         // Stop camera and hide camera container
         stopCamera()
 
-        console.log("Photo captured successfully")
+        console.log("Photo captured successfully:", fileName)
       },
       "image/jpeg",
       0.9,
@@ -404,7 +411,7 @@ async function loadLoginInfo() {
     const querySnapshot = await getDocs(q)
 
     if (querySnapshot.empty) {
-      loginInfoContent.innerHTML = "<p>Tidak ada data login yang tersedia.</p>"
+      loginInfoContent.innerHTML = "<p>Tidak ada data login yang tersedia.</</p>"
       return
     }
 
@@ -537,8 +544,14 @@ async function uploadImage(file) {
   try {
     const wibDate = getCurrentDateInWIB()
     const dateString = formatDate(wibDate)
-    const fileName = `${currentUser}_${dateString}_${file.name}`
+
+    // Generate a unique filename
+    const fileExtension = file.name.split(".").pop() || "jpg"
+    const fileName = `${currentUser}_${dateString}_${Date.now()}.${fileExtension}`
+
     const storageRef = ref(storage, `emotion_images/${fileName}`)
+
+    console.log("Uploading to storage:", fileName)
 
     // Upload file
     const snapshot = await uploadBytes(storageRef, file)
@@ -551,6 +564,7 @@ async function uploadImage(file) {
     return downloadURL
   } catch (error) {
     console.error("Error uploading image:", error)
+    alert("Gagal mengupload gambar: " + error.message)
     return null
   }
 }
@@ -559,35 +573,50 @@ async function uploadImage(file) {
 dailyForm.addEventListener("submit", async function (e) {
   e.preventDefault()
 
-  // Get form data
-  const formData = new FormData(this)
+  // Check if required fields are filled
+  const makanPagi = document.querySelector('input[name="makan-pagi"]:checked')
+  const makanSiang = document.querySelector('input[name="makan-siang"]:checked')
+  const makanMalam = document.querySelector('input[name="makan-malam"]:checked')
+  const jajan = document.querySelector('input[name="jajan"]:checked')
+  const rating = document.getElementById("rating-value").value
 
-  // Get current date in WIB timezone
-  const wibDate = getCurrentDateInWIB()
-  const today = formatDate(wibDate) // YYYY-MM-DD format
-
-  // Upload image if selected
-  let imageURL = null
-  if (selectedImage) {
-    imageURL = await uploadImage(selectedImage)
-  }
-
-  // Create entry object
-  const entry = {
-    makanPagi: formData.get("makan-pagi"),
-    makanSiang: formData.get("makan-siang"),
-    makanMalam: formData.get("makan-malam"),
-    jajan: formData.get("jajan"),
-    foods: Array.from(formData.getAll("food")),
-    rating: Number.parseInt(formData.get("rating")),
-    curhat: formData.get("curhat") || "", // Make curhat optional
-    imageURL: imageURL, // Add image URL
-    date: today,
-    user: currentUser,
-    timestamp: new Date().toISOString(),
+  if (!makanPagi || !makanSiang || !makanMalam || !jajan || !rating) {
+    alert("Mohon lengkapi semua data yang diperlukan!")
+    return
   }
 
   try {
+    // Get form data
+    const formData = new FormData(this)
+
+    // Get current date in WIB timezone
+    const wibDate = getCurrentDateInWIB()
+    const today = formatDate(wibDate) // YYYY-MM-DD format
+
+    // Upload image if selected
+    let imageURL = null
+    if (selectedImage) {
+      console.log("Uploading image:", selectedImage.name, selectedImage.type, selectedImage.size)
+      imageURL = await uploadImage(selectedImage)
+    }
+
+    // Create entry object
+    const entry = {
+      makanPagi: formData.get("makan-pagi"),
+      makanSiang: formData.get("makan-siang"),
+      makanMalam: formData.get("makan-malam"),
+      jajan: formData.get("jajan"),
+      foods: Array.from(formData.getAll("food")),
+      rating: Number.parseInt(formData.get("rating")),
+      curhat: formData.get("curhat") || "", // Make curhat optional
+      imageURL: imageURL, // Add image URL
+      date: today,
+      user: currentUser,
+      timestamp: new Date().toISOString(),
+    }
+
+    console.log("Saving entry:", entry)
+
     // Save to Firestore
     await setDoc(doc(db, "entries", `${currentUser}_${today}`), entry)
 
