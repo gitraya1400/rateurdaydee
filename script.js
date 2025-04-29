@@ -79,10 +79,9 @@ const storage = getStorage()
 
 // Get current date in Indonesia timezone (WIB/GMT+7)
 function getCurrentDateInWIB() {
-  const now = new Date()
-  // Add 7 hours to UTC to get WIB time
-  const wibTime = new Date(now.getTime() + 7 * 60 * 60 * 1000)
-  return wibTime
+  // Use the current date directly without timezone adjustment
+  // This will use the local timezone of the user's device
+  return new Date()
 }
 
 // Format date for display
@@ -455,15 +454,17 @@ function populateUserSelector() {
   allOption.textContent = "Semua Pengguna"
   userSelector.appendChild(allOption)
 
-  // Add option for current user
-  const currentOption = document.createElement("option")
-  currentOption.value = currentUser
-  currentOption.textContent = currentUser
-  userSelector.appendChild(currentOption)
+  // Add option for current user if not admin
+  if (currentUser !== "admin") {
+    const currentOption = document.createElement("option")
+    currentOption.value = currentUser
+    currentOption.textContent = currentUser
+    userSelector.appendChild(currentOption)
+  }
 
-  // Add options for other users
+  // Add options for other users (excluding admin)
   validUsers.forEach((user) => {
-    if (user.username !== currentUser) {
+    if (user.username !== currentUser && user.username !== "admin") {
       const option = document.createElement("option")
       option.value = user.username
       option.textContent = user.username
@@ -471,9 +472,15 @@ function populateUserSelector() {
     }
   })
 
-  // Default to current user
-  selectedUser = currentUser
-  userSelector.value = currentUser
+  // Default to current user or first non-admin user
+  if (currentUser !== "admin") {
+    selectedUser = currentUser
+    userSelector.value = currentUser
+  } else {
+    // If current user is admin, default to "all"
+    selectedUser = "all"
+    userSelector.value = "all"
+  }
 }
 
 // Star rating
@@ -782,124 +789,6 @@ function showImageViewer(imageURL) {
   imageViewerPopup.classList.remove("hidden")
 }
 
-function renderCalendar() {
-  // Update month and year display
-  const monthNames = [
-    "Januari",
-    "Februari",
-    "Maret",
-    "April",
-    "Mei",
-    "Juni",
-    "Juli",
-    "Agustus",
-    "September",
-    "Oktober",
-    "November",
-    "Desember",
-  ]
-  currentMonthDisplay.textContent = `${monthNames[currentMonth]} ${currentYear}`
-
-  // Clear previous calendar
-  calendarDays.innerHTML = ""
-
-  // Get first day of month and number of days
-  const firstDay = new Date(currentYear, currentMonth, 1).getDay()
-  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate()
-
-  // Add empty cells for days before first day of month
-  for (let i = 0; i < firstDay; i++) {
-    const emptyDay = document.createElement("div")
-    calendarDays.appendChild(emptyDay)
-  }
-
-  // Add days of month
-  for (let day = 1; day <= daysInMonth; day++) {
-    const dayElement = document.createElement("div")
-    dayElement.classList.add("calendar-day")
-    dayElement.textContent = day
-
-    // Format date string
-    const dateString = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
-
-    // Check if day has entry based on selected user
-    let hasEntry = false
-    let rating = 0
-    let hasImage = false
-
-    if (selectedUser === "all") {
-      // Check all users for entries on this date
-      for (const user in allUsersData) {
-        if (allUsersData[user][dateString]) {
-          hasEntry = true
-          // Use the highest rating if multiple users have entries
-          const userRating = allUsersData[user][dateString].rating || 0
-          rating = Math.max(rating, userRating)
-
-          // Check if any user has an image for this date
-          if (allUsersData[user][dateString].imageURL) {
-            hasImage = true
-          }
-        }
-      }
-    } else {
-      // Check only selected user
-      const userEntries = allUsersData[selectedUser] || {}
-      if (userEntries[dateString]) {
-        hasEntry = true
-        rating = userEntries[dateString].rating || 0
-
-        // Check if selected user has an image for this date
-        if (userEntries[dateString].imageURL) {
-          hasImage = true
-        }
-      }
-    }
-
-    if (hasEntry) {
-      dayElement.classList.add("has-entry")
-
-      // Add color based on rating
-      if (rating) {
-        dayElement.classList.add(`rating-${rating}`)
-      }
-
-      // Add image indicator if day has image
-      if (hasImage) {
-        dayElement.classList.add("has-image")
-      }
-    }
-
-    // Check if this is a special date (11th of any month)
-    if (isSpecialDate(day, currentMonth, currentYear)) {
-      dayElement.classList.add("special-date")
-
-      // Check if this is an anniversary date (August 11th)
-      if (isAnniversaryDate(day, currentMonth, currentYear)) {
-        dayElement.classList.add("anniversary-date")
-
-        // Add celebration animation
-        const highlight = document.createElement("div")
-        highlight.classList.add("anniversary-highlight")
-        dayElement.appendChild(highlight)
-      }
-    }
-
-    // Add click event to show day details
-    dayElement.addEventListener("click", () => {
-      // Show regular day details
-      showDayDetails(dateString, day)
-
-      // If it's a special date, also show the special popup
-      if (isSpecialDate(day, currentMonth, currentYear)) {
-        showSpecialDatePopup(day, currentMonth, currentYear)
-      }
-    })
-
-    calendarDays.appendChild(dayElement)
-  }
-}
-
 function showDayDetails(dateString, day) {
   // Show day details section
   dayDetails.classList.remove("hidden")
@@ -990,7 +879,7 @@ function showDayDetails(dateString, day) {
         `
       }
 
-      // Add image if available
+      // Add image if available with responsive sizing
       if (data.imageURL) {
         entryContent += `
           <h4>Picture Your Emotion</h4>
@@ -1019,6 +908,91 @@ function showDayDetails(dateString, day) {
     })
   } else {
     dayContent.innerHTML = "<p>Tidak ada data untuk tanggal ini.</p>"
+  }
+}
+
+// Calendar rendering function
+function renderCalendar() {
+  const firstDayOfMonth = new Date(currentYear, currentMonth, 1)
+  const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0)
+  const totalDays = lastDayOfMonth.getDate()
+  const startDay = firstDayOfMonth.getDay() // 0 (Sunday) to 6 (Saturday)
+
+  // Month names array
+  const monthNames = [
+    "Januari",
+    "Februari",
+    "Maret",
+    "April",
+    "Mei",
+    "Juni",
+    "Juli",
+    "Agustus",
+    "September",
+    "Oktober",
+    "November",
+    "Desember",
+  ]
+
+  // Update current month display
+  currentMonthDisplay.textContent = `${monthNames[currentMonth]} ${currentYear}`
+
+  // Clear previous calendar
+  calendarDays.innerHTML = ""
+
+  // Add empty cells for the days before the first day of the month
+  for (let i = 0; i < startDay; i++) {
+    const emptyCell = document.createElement("div")
+    emptyCell.classList.add("calendar-day", "empty")
+    calendarDays.appendChild(emptyCell)
+  }
+
+  // Add days of the month
+  for (let day = 1; day <= totalDays; day++) {
+    const dateString = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+    const calendarDay = document.createElement("div")
+    calendarDay.classList.add("calendar-day")
+    calendarDay.textContent = day
+
+    // Check if the date is a special date
+    if (isSpecialDate(day, currentMonth, currentYear) || isAnniversaryDate(day, currentMonth, currentYear)) {
+      calendarDay.classList.add("special-date")
+    }
+
+    // Check if there is data for this day
+    let hasData = false
+
+    if (selectedUser === "all") {
+      // Check if any user has data for this date
+      for (const user in allUsersData) {
+        if (allUsersData[user][dateString]) {
+          hasData = true
+          break
+        }
+      }
+    } else {
+      // Check if the selected user has data for this date
+      const userEntries = allUsersData[selectedUser] || {}
+      if (userEntries[dateString]) {
+        hasData = true
+      }
+    }
+
+    if (hasData) {
+      calendarDay.classList.add("has-data")
+    }
+
+    // Add click event to show day details
+    calendarDay.addEventListener("click", () => {
+      showDayDetails(dateString, day)
+    })
+
+    // Add click event to show special date popup
+    calendarDay.addEventListener("dblclick", () => {
+      showSpecialDatePopup(day, currentMonth, currentYear)
+    })
+
+    calendarDays.appendChild(calendarDay)
   }
 }
 
