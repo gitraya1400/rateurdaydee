@@ -55,6 +55,21 @@
             <div class="betta-fin-bottom"></div>
             <div class="betta-eye"></div>
         </div>
+        
+        <!-- New Butterfly Animation -->
+        <div class="butterfly-animation">
+            <div class="butterfly-body"></div>
+            <div class="butterfly-wing-left"></div>
+            <div class="butterfly-wing-right"></div>
+        </div>
+        
+        <!-- New Bunny Animation -->
+        <div class="bunny-animation">
+            <div class="bunny-body"></div>
+            <div class="bunny-ear-left"></div>
+            <div class="bunny-ear-right"></div>
+            <div class="bunny-tail"></div>
+        </div>
     </div>
 
     <!-- Login Page -->
@@ -106,6 +121,7 @@
             <!-- Beranda Page -->
             <section id="beranda" class="page">
                 <h2>Bagaimana harimu hari ini?</h2>
+                <div id="current-date-display" class="current-date-display"></div>
                 <form id="daily-form">
                     <div class="form-section">
                         <h3>Makan Ga De?</h3>
@@ -196,14 +212,29 @@
                             <input type="hidden" name="rating" id="rating-value" required>
                         </div>
                     </div>
+                    
                     <div class="form-section">
                         <h3>Curhat Hari Ini</h3>
                         <div class="form-group">
                             <label for="curhat"></label>
-                            <textarea id="curhat" name="curhat" rows="5" placeholder="Cerita tentang harimu..." required></textarea>
+                            <textarea id="curhat" name="curhat" rows="5" placeholder="Cerita tentang harimu... (opsional)"></textarea>
                         </div>
                     </div>
                     
+                    <!-- New Image Upload Section -->
+                    <div class="form-section">
+                        <h3>Picture Your Emotion</h3>
+                        <div class="form-group">
+                            <label for="emotion-image">Upload gambar yang menggambarkan perasaanmu (opsional)</label>
+                            <div class="image-upload-container">
+                                <input type="file" id="emotion-image" name="emotion-image" accept="image/*" class="image-upload-input">
+                                <div class="image-preview-container">
+                                    <img id="image-preview" src="#" alt="Preview" class="hidden">
+                                    <button type="button" id="remove-image" class="btn-small hidden">Hapus Gambar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     <button type="submit" class="btn">Simpan</button>
                 </form>
@@ -312,6 +343,17 @@
                 <div class="confetti"></div>
                 <div class="confetti"></div>
                 <div class="confetti"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Viewer Popup -->
+    <div id="image-viewer-popup" class="popup hidden">
+        <div class="popup-content">
+            <span class="close-popup">&times;</span>
+            <h3>Emotion Picture</h3>
+            <div class="image-viewer-container">
+                <img id="image-viewer" src="#" alt="Emotion Picture">
             </div>
         </div>
     </div>
