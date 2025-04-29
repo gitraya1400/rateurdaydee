@@ -12,6 +12,12 @@ import {
   orderBy,
   limit,
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL,
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js"
 
 // User credentials - simple username/password pairs
 const validUsers = [
@@ -49,15 +55,66 @@ const celebrationAnimation = document.getElementById("celebration-animation")
 const adminMenuBtn = document.getElementById("admin-menu-btn")
 const loginInfoPage = document.getElementById("login-info")
 const loginInfoContent = document.getElementById("login-info-content")
+const currentDateDisplay = document.getElementById("current-date-display")
+const imageInput = document.getElementById("emotion-image")
+const imagePreview = document.getElementById("image-preview")
+const removeImageBtn = document.getElementById("remove-image")
+const imageViewerPopup = document.getElementById("image-viewer-popup")
+const imageViewer = document.getElementById("image-viewer")
 
 // Current user and data
 let currentUser = null
 let userData = {}
 let allUsersData = {}
 let selectedUser = null
-const currentDate = new Date()
-let currentMonth = currentDate.getMonth()
-let currentYear = currentDate.getFullYear()
+let selectedImage = null
+
+// Initialize Firebase Storage
+const storage = getStorage()
+
+// Get current date in Indonesia timezone (WIB/GMT+7)
+function getCurrentDateInWIB() {
+  const now = new Date()
+  // Add 7 hours to UTC to get WIB time
+  const wibTime = new Date(now.getTime() + 7 * 60 * 60 * 1000)
+  return wibTime
+}
+
+// Format date for display
+function formatDate(date) {
+  const day = date.getDate()
+  const month = date.getMonth() + 1
+  const year = date.getFullYear()
+  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+}
+
+// Format date for display in Indonesian format
+function formatDateIndonesian(date) {
+  const day = date.getDate()
+  const monthNames = [
+    "Januari",
+    "Februari",
+    "Maret",
+    "April",
+    "Mei",
+    "Juni",
+    "Juli",
+    "Agustus",
+    "September",
+    "Oktober",
+    "November",
+    "Desember",
+  ]
+  const month = monthNames[date.getMonth()]
+  const year = date.getFullYear()
+  return `${day} ${month} ${year}`
+}
+
+// Update current date display
+function updateCurrentDateDisplay() {
+  const wibDate = getCurrentDateInWIB()
+  currentDateDisplay.textContent = formatDateIndonesian(wibDate)
+}
 
 // Check if user is already logged in
 function checkLoggedInUser() {
@@ -73,6 +130,7 @@ function checkLoggedInUser() {
       loadAllUsersData().then(() => {
         populateUserSelector()
         showApp()
+        updateCurrentDateDisplay()
 
         // Tampilkan menu admin jika user adalah admin
         if (currentUser === "admin") {
@@ -119,6 +177,7 @@ loginForm.addEventListener("submit", async (e) => {
     await loadAllUsersData()
     populateUserSelector()
     showApp()
+    updateCurrentDateDisplay()
     console.log("App should be visible now")
 
     // Tampilkan menu admin jika user adalah admin
@@ -171,6 +230,41 @@ navLinks.forEach((link) => {
     // Jika halaman login info dipilih, muat data login
     if (pageId === "login-info") {
       loadLoginInfo()
+    }
+  })
+})
+
+// Image input change handler
+imageInput.addEventListener("change", function (e) {
+  if (this.files && this.files[0]) {
+    const file = this.files[0]
+    selectedImage = file
+
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      imagePreview.src = e.target.result
+      imagePreview.classList.remove("hidden")
+      removeImageBtn.classList.remove("hidden")
+    }
+    reader.readAsDataURL(file)
+  }
+})
+
+// Remove image button
+removeImageBtn.addEventListener("click", () => {
+  imageInput.value = ""
+  imagePreview.src = "#"
+  imagePreview.classList.add("hidden")
+  removeImageBtn.classList.add("hidden")
+  selectedImage = null
+})
+
+// Close image viewer popup
+document.querySelectorAll(".close-popup").forEach((button) => {
+  button.addEventListener("click", function () {
+    const popup = this.closest(".popup")
+    if (popup) {
+      popup.classList.add("hidden")
     }
   })
 })
@@ -324,7 +418,36 @@ window.addEventListener("click", (e) => {
   if (e.target === specialDatePopup) {
     specialDatePopup.classList.add("hidden")
   }
+
+  if (e.target === imageViewerPopup) {
+    imageViewerPopup.classList.add("hidden")
+  }
 })
+
+// Upload image to Firebase Storage
+async function uploadImage(file) {
+  if (!file) return null
+
+  try {
+    const wibDate = getCurrentDateInWIB()
+    const dateString = formatDate(wibDate)
+    const fileName = `${currentUser}_${dateString}_${file.name}`
+    const storageRef = ref(storage, `emotion_images/${fileName}`)
+
+    // Upload file
+    const snapshot = await uploadBytes(storageRef, file)
+    console.log("Uploaded image successfully")
+
+    // Get download URL
+    const downloadURL = await getDownloadURL(snapshot.ref)
+    console.log("Image URL:", downloadURL)
+
+    return downloadURL
+  } catch (error) {
+    console.error("Error uploading image:", error)
+    return null
+  }
+}
 
 // Daily form submission
 dailyForm.addEventListener("submit", async function (e) {
@@ -332,7 +455,16 @@ dailyForm.addEventListener("submit", async function (e) {
 
   // Get form data
   const formData = new FormData(this)
-  const today = new Date().toISOString().split("T")[0] // YYYY-MM-DD format
+
+  // Get current date in WIB timezone
+  const wibDate = getCurrentDateInWIB()
+  const today = formatDate(wibDate) // YYYY-MM-DD format
+
+  // Upload image if selected
+  let imageURL = null
+  if (selectedImage) {
+    imageURL = await uploadImage(selectedImage)
+  }
 
   // Create entry object
   const entry = {
@@ -342,7 +474,8 @@ dailyForm.addEventListener("submit", async function (e) {
     jajan: formData.get("jajan"),
     foods: Array.from(formData.getAll("food")),
     rating: Number.parseInt(formData.get("rating")),
-    curhat: formData.get("curhat"), // <-- Tambahan ini
+    curhat: formData.get("curhat") || "", // Make curhat optional
+    imageURL: imageURL, // Add image URL
     date: today,
     user: currentUser,
     timestamp: new Date().toISOString(),
@@ -364,6 +497,12 @@ dailyForm.addEventListener("submit", async function (e) {
     this.reset()
     ratingInput.value = ""
     highlightStars(0)
+
+    // Reset image preview
+    imagePreview.src = "#"
+    imagePreview.classList.add("hidden")
+    removeImageBtn.classList.add("hidden")
+    selectedImage = null
   } catch (error) {
     console.error("Error saving data:", error)
     alert("Gagal menyimpan data: " + error.message)
@@ -371,6 +510,9 @@ dailyForm.addEventListener("submit", async function (e) {
 })
 
 // Calendar navigation
+let currentMonth = new Date().getMonth()
+let currentYear = new Date().getFullYear()
+
 prevMonthBtn.addEventListener("click", () => {
   currentMonth--
   if (currentMonth < 0) {
@@ -502,6 +644,14 @@ function showSpecialDatePopup(day, month, year) {
   specialDatePopup.classList.remove("hidden")
 }
 
+// Show image viewer popup
+function showImageViewer(imageURL) {
+  if (!imageURL) return
+
+  imageViewer.src = imageURL
+  imageViewerPopup.classList.remove("hidden")
+}
+
 function renderCalendar() {
   // Update month and year display
   const monthNames = [
@@ -545,6 +695,7 @@ function renderCalendar() {
     // Check if day has entry based on selected user
     let hasEntry = false
     let rating = 0
+    let hasImage = false
 
     if (selectedUser === "all") {
       // Check all users for entries on this date
@@ -554,6 +705,11 @@ function renderCalendar() {
           // Use the highest rating if multiple users have entries
           const userRating = allUsersData[user][dateString].rating || 0
           rating = Math.max(rating, userRating)
+
+          // Check if any user has an image for this date
+          if (allUsersData[user][dateString].imageURL) {
+            hasImage = true
+          }
         }
       }
     } else {
@@ -562,6 +718,11 @@ function renderCalendar() {
       if (userEntries[dateString]) {
         hasEntry = true
         rating = userEntries[dateString].rating || 0
+
+        // Check if selected user has an image for this date
+        if (userEntries[dateString].imageURL) {
+          hasImage = true
+        }
       }
     }
 
@@ -571,6 +732,11 @@ function renderCalendar() {
       // Add color based on rating
       if (rating) {
         dayElement.classList.add(`rating-${rating}`)
+      }
+
+      // Add image indicator if day has image
+      if (hasImage) {
+        dayElement.classList.add("has-image")
       }
     }
 
@@ -694,6 +860,16 @@ function showDayDetails(dateString, day) {
         `
       }
 
+      // Add image if available
+      if (data.imageURL) {
+        entryContent += `
+          <h4>Picture Your Emotion</h4>
+          <div class="day-image">
+            <img src="${data.imageURL}" alt="Emotion Picture" onclick="showImageViewer('${data.imageURL}')">
+          </div>
+        `
+      }
+
       entryContent += `</div>`
 
       // Add a separator between entries
@@ -702,6 +878,14 @@ function showDayDetails(dateString, day) {
       }
 
       dayContent.innerHTML += entryContent
+    })
+
+    // Add click event to images
+    const dayImages = dayContent.querySelectorAll(".day-image img")
+    dayImages.forEach((img) => {
+      img.addEventListener("click", function () {
+        showImageViewer(this.src)
+      })
     })
   } else {
     dayContent.innerHTML = "<p>Tidak ada data untuk tanggal ini.</p>"
@@ -719,12 +903,14 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!userDisplay) console.error("userDisplay not found")
 
   // Close special date popup when clicking X
-  const specialDateCloseBtn = specialDatePopup.querySelector(".close-popup")
-  if (specialDateCloseBtn) {
-    specialDateCloseBtn.addEventListener("click", () => {
-      specialDatePopup.classList.add("hidden")
+  document.querySelectorAll(".close-popup").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const popup = btn.closest(".popup")
+      if (popup) {
+        popup.classList.add("hidden")
+      }
     })
-  }
+  })
 
   // Tambahkan event listener untuk tombol menu admin
   const adminMenuBtn = document.getElementById("admin-menu-btn")
@@ -750,5 +936,9 @@ document.addEventListener("DOMContentLoaded", () => {
     })
   }
 
+  // Update current date display
+  updateCurrentDateDisplay()
+
+  // Check for logged in user
   checkLoggedInUser()
 })
