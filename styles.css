@@ -392,6 +392,28 @@ main {
   animation: fadeIn 0.5s ease;
 }
 
+/* Add responsive image styling for day details */
+.day-image {
+  margin-top: 15px;
+  text-align: center;
+}
+
+.day-image img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  margin-bottom: 10px;
+}
+
+.emotion-image {
+  max-width: 100%;
+  height: auto;
+  max-height: 300px;
+  object-fit: contain;
+  cursor: pointer;
+}
+
 .entry-separator {
   margin: 20px 0;
   border: 0;
@@ -660,6 +682,27 @@ footer {
 #cancel-camera {
   background-color: var(--dark-color);
   color: white;
+}
+
+/* Improve image viewer styling */
+#image-viewer-popup .popup-content {
+  max-width: 90%;
+  max-height: 90vh;
+  overflow: auto;
+  padding: 20px;
+}
+
+#image-viewer {
+  max-width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+}
+
+.image-viewer-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 15px;
 }
 
 /* Responsive Design */
