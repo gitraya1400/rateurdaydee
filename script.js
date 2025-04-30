@@ -980,6 +980,30 @@ function renderCalendar() {
 
     if (hasData) {
       calendarDay.classList.add("has-data")
+
+      // Get the rating for this day and add the appropriate class
+      let rating = 0
+
+      if (selectedUser === "all") {
+        // For "all" view, use the first entry with a rating
+        for (const user in allUsersData) {
+          if (allUsersData[user][dateString] && allUsersData[user][dateString].rating) {
+            rating = allUsersData[user][dateString].rating
+            break
+          }
+        }
+      } else {
+        // For specific user, get their rating
+        const userEntries = allUsersData[selectedUser] || {}
+        if (userEntries[dateString] && userEntries[dateString].rating) {
+          rating = userEntries[dateString].rating
+        }
+      }
+
+      // Add rating class if rating exists
+      if (rating > 0) {
+        calendarDay.classList.add(`rating-${rating}`)
+      }
     }
 
     // Add click event to show day details
